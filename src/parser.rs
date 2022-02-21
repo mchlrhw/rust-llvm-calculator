@@ -3,23 +3,27 @@ use crate::{ast::Node, error::Error};
 pub fn parse(x: &str) -> Result<Node, Error> {
     peg::parser! {
         grammar syntax() for str {
+            rule _ = quiet!{[' ' | '\r' | '\n' | '\t']*};
+
             rule number() -> i32
                 = n:$(['0'..='9']+) { n.parse().unwrap() }
 
-            pub(crate) rule calculate() -> Node = precedence!{
-                x:(@) "+" y:@ { Node::Add(Box::new(x), Box::new(y)) }
-                x:(@) "-" y:@ { Node::Sub(Box::new(x), Box::new(y)) }
+            rule calculate() -> Node = precedence!{
+                x:(@) _ "+" _ y:@ { Node::Add(Box::new(x), Box::new(y)) }
+                x:(@) _ "-" _ y:@ { Node::Sub(Box::new(x), Box::new(y)) }
                 --
-                x:(@) "*" y:@ { Node::Mul(Box::new(x), Box::new(y)) }
-                x:(@) "/" y:@ { Node::Div(Box::new(x), Box::new(y)) }
+                x:(@) _ "*" _ y:@ { Node::Mul(Box::new(x), Box::new(y)) }
+                x:(@) _ "/" _ y:@ { Node::Div(Box::new(x), Box::new(y)) }
                 --
-                "(" v:calculate() ")" { v }
+                "(" _ v:calculate() _ ")" { v }
                 n:number() { Node::Number(n) }
             }
+
+            pub rule expr() -> Node = _ v:calculate() _ { v };
         }
     }
 
-    syntax::calculate(x).map_err(|e| Error::Parse {
+    syntax::expr(x).map_err(|e| Error::Parse {
         message: e.to_string(),
     })
 }
