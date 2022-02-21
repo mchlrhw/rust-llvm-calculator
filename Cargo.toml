@@ -1,12 +1,10 @@
 [package]
-name = "anharu-calculator-project"
-version = "1.0.0"
-authors = ["Anharu <haruan2394@gmail.com>"]
-edition = "2018"
-build = "build.rs"
+name = "calc"
+version = "2.0.0"
+edition = "2021"
 
 [dependencies]
-failure = "0.1.5"
-inkwell = { git = "https://github.com/TheDan64/inkwell", branch = "llvm7-0" }
-[build-dependencies]
-peg = { version = "0.5" }
+anyhow = "1.0.53"
+inkwell = { version = "0.1.0-beta.4", features = ["llvm13-0"] }
+peg = "0.8.0"
+thiserror = "1.0.30"

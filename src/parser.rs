@@ -1,25 +1,37 @@
-use crate::ast::Node;
-use crate::error::ParseError;
-use failure::Error;
-
-pub mod syntax {
-    include!(concat!(env!("OUT_DIR"), "/calculator.rs"));
-}
+use crate::{ast::Node, error::Error};
 
 pub fn parse(x: &str) -> Result<Node, Error> {
-    syntax::expr(x).map_err(|e| {
-        ParseError {
-            message: e.to_string(),
+    peg::parser! {
+        grammar syntax() for str {
+            rule number() -> i32
+                = n:$(['0'..='9']+) { n.parse().unwrap() }
+
+            pub(crate) rule calculate() -> Node = precedence!{
+                x:(@) "+" y:@ { Node::Add(Box::new(x), Box::new(y)) }
+                x:(@) "-" y:@ { Node::Sub(Box::new(x), Box::new(y)) }
+                --
+                x:(@) "*" y:@ { Node::Mul(Box::new(x), Box::new(y)) }
+                x:(@) "/" y:@ { Node::Div(Box::new(x), Box::new(y)) }
+                --
+                "(" v:calculate() ")" { v }
+                n:number() { Node::Number(n) }
+            }
         }
-        .into()
+    }
+
+    syntax::calculate(x).map_err(|e| Error::Parse {
+        message: e.to_string(),
     })
 }
 
 #[cfg(test)]
 mod tests {
     use super::parse;
+
     #[test]
-    fn skip_space() {
-        assert_eq!(parse("1 +\n1 ").unwrap(), parse("1+1").unwrap())
+    fn skip_space() -> anyhow::Result<()> {
+        assert_eq!(parse("1 +\n1 ")?, parse("1+1")?);
+
+        Ok(())
     }
 }

@@ -1,12 +1,12 @@
-use anharu_calculator_project::codegen::compile::compile_string;
+use calc::codegen::compile::compile_string;
 use std::env::args;
-fn main() {
-    let input = args().skip(1).next().expect("Failed to get first arg.");
+
+fn main() -> anyhow::Result<()> {
+    let input = args().skip(1).next().expect("Failed to find argument.");
 
     println!("problem is {}", input);
 
-    println!(
-        "The answer is {}",
-        compile_string(&input).expect("Failed to compile.")
-    );
+    println!("The answer is {}", compile_string(&input)?);
+
+    Ok(())
 }

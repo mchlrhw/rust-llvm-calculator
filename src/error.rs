@@ -1,13 +1,13 @@
-use failure::Fail;
+use inkwell::execution_engine::FunctionLookupError;
 
-#[derive(Fail, Debug)]
-#[fail(display = "Failed to parse: {}", message)]
-pub struct ParseError {
-    pub message: String,
-}
+#[derive(Debug, thiserror::Error)]
+pub enum Error {
+    #[error("Failed to parse: {message}")]
+    Parse { message: String },
 
-#[derive(Fail, Debug)]
-#[fail(display = "Failed to create a execution engine: {}", llvm_message)]
-pub struct CreateExecutionEngineError {
-    pub llvm_message: String,
+    #[error("Failed to create a execution engine: {message}")]
+    ExecutionEngine { message: String },
+
+    #[error(transparent)]
+    Residual(#[from] FunctionLookupError),
 }
