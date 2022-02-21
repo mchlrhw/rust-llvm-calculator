@@ -6,7 +6,7 @@ use inkwell::{
 type SumFunc = unsafe extern "C" fn() -> i32;
 
 pub fn compile_string(source: &str) -> Result<i32, Error> {
-    let ast = parser::parse(&source)?;
+    let ast = parser::parse(source)?;
     jit_compile(ast)
 }
 
@@ -46,26 +46,25 @@ pub fn compile_ast<'c, 'b>(
             let i32_type_x = compile_ast(*x, context, builder);
             let i32_type_y = compile_ast(*y, context, builder);
 
-            let sum = builder.build_int_add(i32_type_x, i32_type_y, "sum");
-            sum
+            builder.build_int_add(i32_type_x, i32_type_y, "sum")
         }
         Node::Sub(x, y) => {
             let i32_type_x = compile_ast(*x, context, builder);
             let i32_type_y = compile_ast(*y, context, builder);
-            let sum = builder.build_int_sub(i32_type_x, i32_type_y, "sub");
-            sum
+
+            builder.build_int_sub(i32_type_x, i32_type_y, "sub")
         }
         Node::Mul(x, y) => {
             let i32_type_x = compile_ast(*x, context, builder);
             let i32_type_y = compile_ast(*y, context, builder);
-            let sum = builder.build_int_mul(i32_type_x, i32_type_y, "mul");
-            sum
+
+            builder.build_int_mul(i32_type_x, i32_type_y, "mul")
         }
         Node::Div(x, y) => {
             let i32_type_x = compile_ast(*x, context, builder);
             let i32_type_y = compile_ast(*y, context, builder);
-            let sum = builder.build_int_unsigned_div(i32_type_x, i32_type_y, "div");
-            sum
+
+            builder.build_int_unsigned_div(i32_type_x, i32_type_y, "div")
         }
     }
 }
